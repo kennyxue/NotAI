@@ -1,5 +1,8 @@
 # 项目结构
-
+├── ViewModels/ 
+│   ├── ChatViewModel.swift 
+│   ├── DocumentViewModel.swift 
+│   └── DirectoryViewModel.swift 
 ├── AIWritingAssistant/ 
 │   ├── ViewModels/ 
 │   │   ├── ChatViewModel.swift 
@@ -25,10 +28,7 @@
 │   ├── AIWritingAssistant.entitlements 
 │   ├── Views/ 
 │   │   ├── Components/ 
-│   │   │   ├── DirectoryTree/
-│   │   │   ├── TextEditor/
-│   │   │   ├── ToolBar/
-│   │   │   ├── ChatView/
+│   │   │   └── TabButton.swift 
 │   │   └── MainLayout/ 
 │   │       ├── SidebarView.swift 
 │   │       ├── EditorView.swift 
@@ -42,6 +42,10 @@
 │       │   └── AIService.swift 
 │       └── FileManager/ 
 │           └── FileManager.swift 
+├── Models/ 
+│   ├── ChatMessage.swift 
+│   ├── Directory.swift 
+│   └── Document.swift 
 ├── AIWritingAssistantUITests/ 
 │   ├── AIWritingAssistantUITestsLaunchTests.swift 
 │   └── AIWritingAssistantUITests.swift 
@@ -59,9 +63,19 @@
 │       └── xcshareddata/ 
 │           └── swiftpm/ 
 │               └── configuration/ 
+├── zz_demands.md 
+├── zz_plan.md 
+├── zz_structure.md 
+├── troubleshooting.md 
+├── readme.md 
 ├── AIWritingAssistantTests/ 
 │   └── AIWritingAssistantTests.swift 
 ├── .git/ 
+└── Services/ 
+    ├── DataStore/ 
+    │   └── DataStore.swift 
+    └── FileManager/ 
+        └── FileManager.swift 
 
 
 # 架构说明
