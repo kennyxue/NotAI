@@ -11,10 +11,12 @@ struct ContentView: View {
     @EnvironmentObject var documentViewModel: DocumentViewModel
     @EnvironmentObject var directoryViewModel: DirectoryViewModel
     @EnvironmentObject var chatViewModel: ChatViewModel
+    @StateObject private var settings = AppSettings.shared
     @State private var isShowingLeftSidebar = true
     @State private var isShowingRightSidebar = true
     @State private var leftSidebarWidth: CGFloat = Constants.UI.sidebarMinWidth * 2 + Constants.UI.dividerWidth
     @State private var rightSidebarWidth: CGFloat = Constants.UI.assistantMinWidth
+    @State private var isShowingSettings = false
 
     var body: some View {
         HSplitView {
@@ -88,6 +90,18 @@ struct ContentView: View {
             // 右侧工具组
             ToolbarItemGroup(placement: .automatic) {
                 Spacer()
+                
+                // 设置按钮
+                Button(action: {
+                    isShowingSettings.toggle()
+                }) {
+                    Image(systemName: "gear")
+                        .toolbarItemFrame()
+                }
+                .help("设置")
+                .sheet(isPresented: $isShowingSettings) {
+                    SettingsView()
+                }
                 
                 // 左侧边栏开关
                 Button(action: {

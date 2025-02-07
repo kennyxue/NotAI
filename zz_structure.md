@@ -21,7 +21,8 @@
 │   ├── Models/ 
 │   │   ├── ChatMessage.swift 
 │   │   ├── Directory.swift 
-│   │   └── Document.swift 
+│   │   ├── Document.swift 
+│   │   └── AppSettings.swift
 │   ├── Preview Content/ 
 │   │   └── Preview Assets.xcassets/ 
 │   │       └── Contents.json 
@@ -29,6 +30,11 @@
 │   ├── Views/ 
 │   │   ├── Components/ 
 │   │   │   └── TabButton.swift 
+│   │   ├── Settings/
+│   │   │   ├── SettingsView.swift
+│   │   │   ├── ThemeSettingsView.swift
+│   │   │   ├── AISettingsView.swift
+│   │   │   └── GeneralSettingsView.swift
 │   │   └── MainLayout/ 
 │   │       ├── SidebarView.swift 
 │   │       ├── EditorView.swift 

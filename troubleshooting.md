@@ -285,6 +285,22 @@
   4. 建立模型协议遵循的检查清单
   5. 定期审查模型类型的协议实现
 
+#### 5.14 Double和CGFloat类型转换问题
+- 日期：2025/2/6
+- 类型：编译错误
+- 描述：UserDefaults中存储的Double类型无法直接转换为CGFloat
+- 影响：项目无法编译，出现"'Double' is not convertible to 'CGFloat'"错误
+- 解决方案：
+  1. 存储时将CGFloat转换为Double：`UserDefaults.standard.set(Double(fontSize), forKey: "fontSize")`
+  2. 读取时将Double转换为CGFloat：`CGFloat(UserDefaults.standard.double(forKey: "fontSize"))`
+  3. 添加默认值处理，避免无效值：`CGFloat(...) > 0 ? CGFloat(...) : defaultValue`
+- 预防措施：
+  1. 注意Swift中数值类型的转换规则
+  2. 在处理UserDefaults存储时考虑类型兼容性
+  3. 为所有数值类型设置合理的默认值
+  4. 添加数值范围检查
+  5. 使用类型安全的包装器处理数据存储
+
 ### 6. AI集成问题
 
 ## 问题记录模板
@@ -313,6 +329,7 @@
 13. 主题切换优化（2025/2/6）
 14. SwiftUI frame参数顺序问题（2025/2/6）
 15. ChatMessage类型不符合Equatable协议（2025/2/6）
+16. Double和CGFloat类型转换问题（2025/2/6）
 
 ## 待解决问题列表
 1. 深色模式适配
