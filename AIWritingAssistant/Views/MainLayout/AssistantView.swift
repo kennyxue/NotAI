@@ -9,16 +9,23 @@ struct AssistantView: View {
             // 标签选择器
             HStack(spacing: 0) {
                 TabButton(title: "CHAT", isSelected: selectedTab == 0) {
-                    selectedTab = 0
+                    withAnimation(.easeInOut(duration: Constants.UI.quickAnimationDuration)) {
+                        selectedTab = 0
+                    }
                 }
                 TabButton(title: "COMPOSER", isSelected: selectedTab == 1) {
-                    selectedTab = 1
+                    withAnimation(.easeInOut(duration: Constants.UI.quickAnimationDuration)) {
+                        selectedTab = 1
+                    }
                 }
                 TabButton(title: "STYLING", isSelected: selectedTab == 2) {
-                    selectedTab = 2
+                    withAnimation(.easeInOut(duration: Constants.UI.quickAnimationDuration)) {
+                        selectedTab = 2
+                    }
                 }
             }
-            .padding(.horizontal)
+            .frame(height: Constants.UI.tabBarHeight)
+            .padding(.horizontal, Constants.UI.smallPadding)
             
             // 内容区域
             if selectedTab == 0 {
@@ -37,21 +44,35 @@ struct AssistantView: View {
 struct ChatView: View {
     @EnvironmentObject var chatViewModel: ChatViewModel
     @State private var messageText: String = ""
+    @State private var scrollProxy: ScrollViewProxy? = nil
     
     var body: some View {
-        VStack {
+        VStack(spacing: 0) {
             // 聊天历史
             ScrollView {
-                LazyVStack(alignment: .leading, spacing: 10) {
-                    ForEach(chatViewModel.messages) { message in
-                        MessageBubble(message: message)
+                ScrollViewReader { proxy in
+                    LazyVStack(alignment: .leading, spacing: Constants.UI.mediumPadding) {
+                        ForEach(chatViewModel.messages) { message in
+                            MessageBubble(message: message)
+                                .id(message.id)
+                        }
+                    }
+                    .padding(Constants.UI.mediumPadding)
+                    .onChange(of: chatViewModel.messages) { _, _ in
+                        withAnimation {
+                            proxy.scrollTo(chatViewModel.messages.last?.id, anchor: .bottom)
+                        }
+                    }
+                    .onAppear {
+                        scrollProxy = proxy
                     }
                 }
-                .padding()
             }
             
+            Divider()
+            
             // 输入区域
-            HStack {
+            HStack(spacing: Constants.UI.smallPadding) {
                 TextField("输入消息...", text: $messageText)
                     .textFieldStyle(RoundedBorderTextFieldStyle())
                     .disabled(chatViewModel.isProcessing)
@@ -63,10 +84,17 @@ struct ChatView: View {
                 }) {
                     Image(systemName: "arrow.up.circle.fill")
                         .font(.title)
+                        .foregroundColor(messageText.isEmpty || chatViewModel.isProcessing ? .gray : Constants.UI.accentColor)
                 }
                 .disabled(messageText.isEmpty || chatViewModel.isProcessing)
             }
-            .padding()
+            .frame(height: Constants.UI.messageInputHeight)
+            .padding(Constants.UI.mediumPadding)
+            .background(Constants.UI.secondaryBackground)
+            .overlay(
+                Divider(),
+                alignment: .top
+            )
         }
     }
 }
@@ -76,48 +104,70 @@ struct ComposerView: View {
     @State private var messageText: String = ""
     @State private var messages: [ChatMessage] = []
     @State private var isProcessing = false
+    @State private var scrollProxy: ScrollViewProxy? = nil
     
     var body: some View {
-        VStack {
+        VStack(spacing: 0) {
             // 对话历史
             ScrollView {
-                LazyVStack(alignment: .leading, spacing: 10) {
-                    ForEach(messages) { message in
-                        MessageBubble(message: message)
+                ScrollViewReader { proxy in
+                    LazyVStack(alignment: .leading, spacing: Constants.UI.mediumPadding) {
+                        ForEach(messages) { message in
+                            MessageBubble(message: message)
+                                .id(message.id)
+                        }
+                    }
+                    .padding(Constants.UI.mediumPadding)
+                    .onChange(of: messages) { _, _ in
+                        withAnimation {
+                            proxy.scrollTo(messages.last?.id, anchor: .bottom)
+                        }
+                    }
+                    .onAppear {
+                        scrollProxy = proxy
                     }
                 }
-                .padding()
             }
             
+            Divider()
+            
             // 工具栏
-            HStack {
+            HStack(spacing: Constants.UI.mediumPadding) {
                 Button(action: {
                     // TODO: 添加提示词模板
                 }) {
                     Image(systemName: "text.badge.plus")
                 }
+                .help("添加提示词模板")
+                
                 Button(action: {
                     // TODO: 添加历史记录
                 }) {
                     Image(systemName: "clock")
                 }
+                .help("查看历史记录")
+                
                 Button(action: {
                     // TODO: 添加设置
                 }) {
                     Image(systemName: "gear")
                 }
+                .help("设置")
+                
                 Spacer()
             }
-            .padding(.horizontal)
+            .padding(.horizontal, Constants.UI.mediumPadding)
+            .padding(.vertical, Constants.UI.smallPadding)
+            .background(Constants.UI.secondaryBackground)
             
             // 输入区域
-            VStack(spacing: 8) {
+            VStack(spacing: Constants.UI.smallPadding) {
                 TextEditor(text: $messageText)
-                    .frame(height: 100)
-                    .padding(4)
+                    .frame(height: Constants.UI.messageInputHeight)
+                    .padding(Constants.UI.smallPadding)
                     .overlay(
-                        RoundedRectangle(cornerRadius: 8)
-                            .stroke(Color.gray.opacity(0.2), lineWidth: 1)
+                        RoundedRectangle(cornerRadius: Constants.UI.defaultCornerRadius)
+                            .stroke(Constants.UI.borderColor, lineWidth: 1)
                     )
                 
                 HStack {
@@ -145,7 +195,12 @@ struct ComposerView: View {
                     .disabled(messageText.isEmpty)
                 }
             }
-            .padding()
+            .padding(Constants.UI.mediumPadding)
+            .background(Constants.UI.secondaryBackground)
+            .overlay(
+                Divider(),
+                alignment: .top
+            )
         }
     }
 }
@@ -155,48 +210,70 @@ struct StylingView: View {
     @State private var messageText: String = ""
     @State private var messages: [ChatMessage] = []
     @State private var isProcessing = false
+    @State private var scrollProxy: ScrollViewProxy? = nil
     
     var body: some View {
-        VStack {
+        VStack(spacing: 0) {
             // 对话历史
             ScrollView {
-                LazyVStack(alignment: .leading, spacing: 10) {
-                    ForEach(messages) { message in
-                        MessageBubble(message: message)
+                ScrollViewReader { proxy in
+                    LazyVStack(alignment: .leading, spacing: Constants.UI.mediumPadding) {
+                        ForEach(messages) { message in
+                            MessageBubble(message: message)
+                                .id(message.id)
+                        }
+                    }
+                    .padding(Constants.UI.mediumPadding)
+                    .onChange(of: messages) { _, _ in
+                        withAnimation {
+                            proxy.scrollTo(messages.last?.id, anchor: .bottom)
+                        }
+                    }
+                    .onAppear {
+                        scrollProxy = proxy
                     }
                 }
-                .padding()
             }
             
+            Divider()
+            
             // 工具栏
-            HStack {
+            HStack(spacing: Constants.UI.mediumPadding) {
                 Button(action: {
                     // TODO: 添加样式模板
                 }) {
                     Image(systemName: "paintbrush")
                 }
+                .help("添加样式模板")
+                
                 Button(action: {
                     // TODO: 添加历史记录
                 }) {
                     Image(systemName: "clock")
                 }
+                .help("查看历史记录")
+                
                 Button(action: {
                     // TODO: 添加设置
                 }) {
                     Image(systemName: "gear")
                 }
+                .help("设置")
+                
                 Spacer()
             }
-            .padding(.horizontal)
+            .padding(.horizontal, Constants.UI.mediumPadding)
+            .padding(.vertical, Constants.UI.smallPadding)
+            .background(Constants.UI.secondaryBackground)
             
             // 输入区域
-            VStack(spacing: 8) {
+            VStack(spacing: Constants.UI.smallPadding) {
                 TextEditor(text: $messageText)
-                    .frame(height: 100)
-                    .padding(4)
+                    .frame(height: Constants.UI.messageInputHeight)
+                    .padding(Constants.UI.smallPadding)
                     .overlay(
-                        RoundedRectangle(cornerRadius: 8)
-                            .stroke(Color.gray.opacity(0.2), lineWidth: 1)
+                        RoundedRectangle(cornerRadius: Constants.UI.defaultCornerRadius)
+                            .stroke(Constants.UI.borderColor, lineWidth: 1)
                     )
                 
                 HStack {
@@ -224,7 +301,12 @@ struct StylingView: View {
                     .disabled(messageText.isEmpty)
                 }
             }
-            .padding()
+            .padding(Constants.UI.mediumPadding)
+            .background(Constants.UI.secondaryBackground)
+            .overlay(
+                Divider(),
+                alignment: .top
+            )
         }
     }
 }
@@ -239,10 +321,12 @@ struct MessageBubble: View {
             }
             
             Text(message.content)
-                .padding()
-                .background(message.isUser ? Constants.UI.accentColor : Color.gray.opacity(0.2))
+                .padding(Constants.UI.mediumPadding)
+                .background(
+                    RoundedRectangle(cornerRadius: Constants.UI.defaultCornerRadius)
+                        .fill(message.isUser ? Constants.UI.accentColor : Constants.UI.hoverBackground)
+                )
                 .foregroundColor(message.isUser ? .white : .primary)
-                .cornerRadius(10)
             
             if !message.isUser {
                 Spacer()

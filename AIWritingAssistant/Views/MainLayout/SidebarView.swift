@@ -11,13 +11,18 @@ struct SidebarView: View {
             if isParent {
                 HStack(spacing: 0) {
                     TabButton(title: "目录", isSelected: selectedTab == 0) {
-                        selectedTab = 0
+                        withAnimation(.easeInOut(duration: Constants.UI.quickAnimationDuration)) {
+                            selectedTab = 0
+                        }
                     }
                     TabButton(title: "搜索", isSelected: selectedTab == 1) {
-                        selectedTab = 1
+                        withAnimation(.easeInOut(duration: Constants.UI.quickAnimationDuration)) {
+                            selectedTab = 1
+                        }
                     }
                 }
-                .padding(.horizontal)
+                .frame(height: Constants.UI.tabBarHeight)
+                .padding(.horizontal, Constants.UI.smallPadding)
             }
             
             // 内容区域
@@ -38,16 +43,22 @@ struct DirectoryList: View {
     
     var body: some View {
         ScrollView {
-            LazyVStack(alignment: .leading, spacing: 1) {
+            LazyVStack(alignment: .leading, spacing: Constants.UI.smallPadding) {
                 if isParent {
                     ForEach(directoryViewModel.parentDirectories) { directory in
                         DirectoryRow(directory: directory)
                             .contentShape(Rectangle())
                             .onTapGesture {
-                                directoryViewModel.currentParentDirectory = directory
+                                withAnimation(.easeInOut(duration: Constants.UI.quickAnimationDuration)) {
+                                    directoryViewModel.currentParentDirectory = directory
+                                }
                             }
-                            .background(directoryViewModel.currentParentDirectory?.id == directory.id ? 
-                                      Constants.UI.accentColor.opacity(0.2) : Color.clear)
+                            .background(
+                                RoundedRectangle(cornerRadius: Constants.UI.smallCornerRadius)
+                                    .fill(directoryViewModel.currentParentDirectory?.id == directory.id ?
+                                          Constants.UI.selectedBackground : Color.clear)
+                            )
+                            .padding(.horizontal, Constants.UI.smallPadding)
                     }
                 } else {
                     if let selectedParent = directoryViewModel.currentParentDirectory {
@@ -55,19 +66,26 @@ struct DirectoryList: View {
                             DirectoryRow(directory: directory)
                                 .contentShape(Rectangle())
                                 .onTapGesture {
-                                    directoryViewModel.currentChildDirectory = directory
+                                    withAnimation(.easeInOut(duration: Constants.UI.quickAnimationDuration)) {
+                                        directoryViewModel.currentChildDirectory = directory
+                                    }
                                 }
-                                .background(directoryViewModel.currentChildDirectory?.id == directory.id ? 
-                                          Constants.UI.accentColor.opacity(0.2) : Color.clear)
+                                .background(
+                                    RoundedRectangle(cornerRadius: Constants.UI.smallCornerRadius)
+                                        .fill(directoryViewModel.currentChildDirectory?.id == directory.id ?
+                                              Constants.UI.selectedBackground : Color.clear)
+                                )
+                                .padding(.horizontal, Constants.UI.smallPadding)
                         }
                     } else {
                         Text("请选择父目录")
                             .foregroundColor(.gray)
-                            .padding()
+                            .frame(maxWidth: .infinity, maxHeight: .infinity)
+                            .padding(Constants.UI.mediumPadding)
                     }
                 }
             }
-            .padding(.vertical, 1)
+            .padding(.vertical, Constants.UI.smallPadding)
         }
     }
 }
@@ -77,16 +95,18 @@ struct SearchView: View {
     @State private var searchText = ""
     
     var body: some View {
-        VStack {
+        VStack(spacing: Constants.UI.mediumPadding) {
             // 搜索框
-            HStack {
+            HStack(spacing: Constants.UI.smallPadding) {
                 Image(systemName: "magnifyingglass")
                     .foregroundColor(.gray)
                 TextField("搜索", text: $searchText)
                     .textFieldStyle(RoundedBorderTextFieldStyle())
                 if !searchText.isEmpty {
                     Button(action: {
-                        searchText = ""
+                        withAnimation(.easeInOut(duration: Constants.UI.quickAnimationDuration)) {
+                            searchText = ""
+                        }
                     }) {
                         Image(systemName: "xmark.circle.fill")
                             .foregroundColor(.gray)
@@ -94,12 +114,24 @@ struct SearchView: View {
                     .buttonStyle(PlainButtonStyle())
                 }
             }
-            .padding()
+            .frame(height: Constants.UI.searchBarHeight)
+            .padding(.horizontal, Constants.UI.mediumPadding)
             
             // 搜索结果列表
-            List {
-                Text("搜索结果将显示在这里")
-                    .foregroundColor(.gray)
+            ScrollView {
+                LazyVStack(alignment: .leading, spacing: Constants.UI.smallPadding) {
+                    if searchText.isEmpty {
+                        Text("输入关键词开始搜索")
+                            .foregroundColor(.gray)
+                            .frame(maxWidth: .infinity)
+                            .padding(Constants.UI.mediumPadding)
+                    } else {
+                        Text("搜索结果将显示在这里")
+                            .foregroundColor(.gray)
+                            .frame(maxWidth: .infinity)
+                            .padding(Constants.UI.mediumPadding)
+                    }
+                }
             }
         }
     }
@@ -109,17 +141,32 @@ struct SearchView: View {
 struct DirectoryRow: View {
     let directory: Directory
     @Environment(\.colorScheme) var colorScheme
+    @State private var isHovered = false
     
     var body: some View {
-        HStack {
+        HStack(spacing: Constants.UI.smallPadding) {
             Image(systemName: "folder")
-                .foregroundColor(.accentColor)
+                .foregroundColor(Constants.UI.accentColor)
             Text(directory.name)
                 .lineLimit(1)
             Spacer()
         }
-        .padding(.horizontal)
-        .padding(.vertical, 6)
+        .frame(height: Constants.UI.directoryRowHeight)
+        .padding(.horizontal, Constants.UI.smallPadding)
+        .background(
+            RoundedRectangle(cornerRadius: Constants.UI.smallCornerRadius)
+                .fill(isHovered ? Constants.UI.hoverBackground : Color.clear)
+        )
+        .onHover { hovering in
+            withAnimation(.easeInOut(duration: Constants.UI.quickAnimationDuration)) {
+                isHovered = hovering
+            }
+        }
     }
+}
+
+#Preview {
+    SidebarView(isParent: true)
+        .environmentObject(DirectoryViewModel(documentViewModel: DocumentViewModel()))
 }
 
