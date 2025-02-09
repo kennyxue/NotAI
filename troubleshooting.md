@@ -301,6 +301,107 @@
   4. 添加数值范围检查
   5. 使用类型安全的包装器处理数据存储
 
+#### 5.15 目录选择状态管理问题
+- 日期：2025/2/6
+- 类型：功能缺陷
+- 描述：点击子级目录后，子级目录栏被清空，显示"请选择父目录"；父级目录选择不能锁定；子级目录显示不能保持
+- 影响：用户无法正常浏览和选择文档，影响用户体验
+- 解决方案：
+  1. 参考问题5.19的解决方案，修正ViewModel的初始化顺序和实例传递问题
+  2. 确保DirectoryViewModel使用正确的DocumentViewModel实例
+  3. 移除不必要的状态标志和复杂的状态管理逻辑
+  4. 添加详细日志跟踪状态变化，方便调试
+- 预防措施：
+  1. 在使用@StateObject时，注意避免重复创建ViewModel实例
+  2. 确保ViewModel之间的依赖关系正确传递
+  3. 使用日志跟踪状态变化，及时发现异常
+  4. 在开发时注意检查ViewModel的生命周期
+  5. 遵循SwiftUI的状态管理最佳实践
+
+#### 5.16 目录选择状态持久化问题
+- 日期：2025/2/6
+- 类型：功能缺陷
+- 描述：子目录选择状态在父目录切换时无法正确保持，即使添加了状态标志位仍然会出现状态丢失
+- 影响：用户在浏览文档时体验不连贯，需要重复选择目录
+- 解决方案：
+  1. 参考问题5.19的解决方案，确保ViewModel实例的正确性和唯一性
+  2. 移除复杂的状态持久化逻辑，依赖正确的ViewModel实例管理
+  3. 简化状态管理，避免使用异步操作和复杂的状态标志
+- 预防措施：
+  1. 确保ViewModel的正确初始化和依赖传递
+  2. 避免创建重复的ViewModel实例
+  3. 保持状态管理逻辑的简单性
+  4. 添加必要的日志跟踪
+  5. 在修改状态时考虑SwiftUI的更新机制
+
+#### 5.17 目录选择死锁问题
+- 日期：2025/2/6
+- 类型：严重缺陷
+- 描述：选择子目录时出现死锁，导致应用卡死，原因是父子目录状态更新之间存在循环依赖；选择子目录时，子目录显示会被清空
+- 影响：用户无法正常使用目录选择功能，严重影响应用可用性
+- 解决方案：
+  1. 参考问题5.19的解决方案，修正ViewModel的初始化和实例传递问题
+  2. 移除不必要的状态管理逻辑和循环依赖
+  3. 保持父子目录状态管理的独立性
+  4. 简化状态更新流程
+- 预防措施：
+  1. 确保ViewModel的正确初始化和依赖传递
+  2. 避免创建重复的ViewModel实例
+  3. 保持状态管理逻辑的简单性
+  4. 避免使用复杂的状态标志系统
+  5. 定期检查和测试目录选择功能的稳定性
+
+#### 5.18 子目录选择状态问题
+- 日期：2025/2/6
+- 类型：功能缺陷
+- 描述：选择子目录时，子目录状态发生变化，导致界面显示不符合预期
+- 影响：用户在浏览文档时，子目录列表的显示状态不正确
+- 解决方案：
+  1. 参考问题5.19的解决方案，修正ViewModel的初始化问题
+  2. 确保使用正确的DocumentViewModel实例
+  3. 简化状态管理逻辑
+  4. 移除不必要的状态检查
+- 预防措施：
+  1. 确保ViewModel的正确初始化和依赖传递
+  2. 避免创建重复的ViewModel实例
+  3. 保持状态管理的简单性
+  4. 仔细测试状态变更的影响
+  5. 记录状态变更的日志
+
+#### 5.19 ViewModel初始化顺序导致的状态管理问题
+- 日期：2025/2/6
+- 类型：状态管理错误
+- 描述：在`AIWritingAssistantApp.swift`中，由于ViewModel的初始化顺序和重复初始化问题，导致子目录在选择操作时被异常清空。具体表现为：选择父目录"快速笔记"后选择子目录"How to save time"，然后选择父目录"日本游"后选择子目录"行程规划"时，每次选择子目录都会导致子目录列表被清空。
+- 影响：用户无法正常浏览和选择文档，严重影响用户体验
+- 解决方案：
+  1. 修改`AIWritingAssistantApp.swift`中的ViewModel初始化逻辑，避免重复创建DocumentViewModel实例
+  2. 将原来的代码：
+     ```swift
+     init() {
+         let docVM = DocumentViewModel()
+         _documentViewModel = StateObject(wrappedValue: docVM)
+         _directoryViewModel = StateObject(wrappedValue: DirectoryViewModel(documentViewModel: docVM))
+         _chatViewModel = StateObject(wrappedValue: ChatViewModel())
+     }
+     ```
+     修改为直接使用已声明的documentViewModel：
+     ```swift
+     init() {
+         _documentViewModel = StateObject(wrappedValue: DocumentViewModel())
+         _directoryViewModel = StateObject(wrappedValue: DirectoryViewModel(documentViewModel: documentViewModel))
+         _chatViewModel = StateObject(wrappedValue: ChatViewModel())
+     }
+     ```
+  3. 确保ViewModel之间的依赖关系正确传递
+  4. 添加状态变化的日志跟踪，方便调试
+- 预防措施：
+  1. 在使用@StateObject时，注意避免重复创建ViewModel实例
+  2. 明确ViewModel之间的依赖关系和初始化顺序
+  3. 使用日志跟踪状态变化，及时发现异常
+  4. 在开发时注意检查ViewModel的生命周期
+  5. 遵循SwiftUI的状态管理最佳实践
+  6. 在代码审查时特别关注ViewModel的初始化逻辑
+
 ### 6. AI集成问题
 
 ## 问题记录模板
@@ -330,6 +431,11 @@
 14. SwiftUI frame参数顺序问题（2025/2/6）
 15. ChatMessage类型不符合Equatable协议（2025/2/6）
 16. Double和CGFloat类型转换问题（2025/2/6）
+17. 目录选择状态管理问题（2025/2/6）
+18. 目录选择状态持久化问题（2025/2/6）
+19. 目录选择死锁问题（2025/2/6）
+20. 子目录选择状态问题（2025/2/6）
+21. ViewModel初始化顺序导致的状态管理问题（2025/2/6）
 
 ## 待解决问题列表
 1. 深色模式适配

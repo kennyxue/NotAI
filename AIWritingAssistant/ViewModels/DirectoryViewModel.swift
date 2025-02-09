@@ -4,20 +4,49 @@ class DirectoryViewModel: ObservableObject {
     @Published var parentDirectories: [Directory] = []
     @Published var currentParentDirectory: Directory? {
         didSet {
-            // 当父目录改变时，清空子目录选择
-            if oldValue?.id != currentParentDirectory?.id {
+            guard oldValue?.id != currentParentDirectory?.id else { return }
+            print("父目录变更: \(oldValue?.name ?? "nil") -> \(currentParentDirectory?.name ?? "nil")")
+            
+            // 如果是由子目录选择触发的父目录变更，不要清空子目录
+            if !isChildDirectorySelecting {
+                print("由父目录直接选择触发")
+                selectedChildId = nil
                 currentChildDirectory = nil
+                print("清空子目录选择(由父目录变更触发)")
+            } else {
+                print("由子目录选择触发父目录变更，保持子目录选择")
             }
+            
+            // 加载子目录
+            loadChildrenIfNeeded()
         }
     }
+    
     @Published var currentChildDirectory: Directory? {
         didSet {
-            // 当子目录改变时，加载对应的文档
-            if let directory = currentChildDirectory {
-                loadDocument(for: directory)
+            guard currentChildDirectory?.id != oldValue?.id else { return }
+            
+            if currentChildDirectory == nil { 
+                print("子目录被清空")
+                selectedChildId = nil
+                return 
             }
+            
+            print("子目录变更: \(oldValue?.name ?? "nil") -> \(currentChildDirectory?.name ?? "nil")")
+            
+            // 保存当前选择的子目录ID
+            selectedChildId = currentChildDirectory?.id
+            
+            // 加载文档
+            loadDocumentIfNeeded()
         }
     }
+    
+    // 标记是否是由子目录选择触发的状态变更
+    private var isChildDirectorySelecting = false
+    
+    // 保存选中的子目录ID
+    private var selectedChildId: UUID?
     
     // 注入文档视图模型
     private var documentViewModel: DocumentViewModel
@@ -148,5 +177,65 @@ class DirectoryViewModel: ObservableObject {
             model,
             mac
         ]
+    }
+    
+    private func loadChildren(for parent: Directory) {
+        // 模拟从数据源加载子目录
+        // 实际应替换为数据存储层的真实调用
+        if let index = parentDirectories.firstIndex(where: { $0.id == parent.id }) {
+            parentDirectories[index].children = parent.children
+        }
+    }
+    
+    private func updateParentIfNeeded() {
+        guard let child = currentChildDirectory,
+              let parent = parentDirectories.first(where: { $0.children.contains(where: { $0.id == child.id }) })
+        else { 
+            print("无法找到子目录对应的父目录")
+            return 
+        }
+        
+        print("检查父目录: \(parent.name)")
+        
+        // 只在父目录不同时更新
+        if currentParentDirectory?.id != parent.id {
+            print("更新父目录选择: \(parent.name)")
+            currentParentDirectory = parent
+        }
+    }
+    
+    private func loadChildrenIfNeeded() {
+        if let parent = currentParentDirectory {
+            loadChildren(for: parent)
+            
+            // 如果有已选择的子目录,尝试恢复选择
+            if let childId = selectedChildId,
+               let child = parent.children.first(where: { $0.id == childId }),
+               currentChildDirectory?.id != childId { // 避免重复设置
+                print("恢复子目录选择: \(child.name)")
+                currentChildDirectory = child
+            }
+        }
+    }
+    
+    private func loadDocumentIfNeeded() {
+        if let directory = currentChildDirectory {
+            loadDocument(for: directory)
+        }
+    }
+    
+    func selectParentDirectory(_ directory: Directory) {
+        print("选择父目录: \(directory.name)")
+        guard currentParentDirectory?.id != directory.id else { return }
+        
+        // 更新父目录
+        currentParentDirectory = directory
+    }
+    
+    func selectChildDirectory(_ directory: Directory) {
+        print("选择子目录: \(directory.name)")
+        
+        // 直接加载文档，不改变子目录状态
+        loadDocument(for: directory)
     }
 }

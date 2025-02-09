@@ -50,7 +50,7 @@ struct DirectoryList: View {
                             .contentShape(Rectangle())
                             .onTapGesture {
                                 withAnimation(.easeInOut(duration: Constants.UI.quickAnimationDuration)) {
-                                    directoryViewModel.currentParentDirectory = directory
+                                    directoryViewModel.selectParentDirectory(directory)
                                 }
                             }
                             .background(
@@ -66,9 +66,7 @@ struct DirectoryList: View {
                             DirectoryRow(directory: directory)
                                 .contentShape(Rectangle())
                                 .onTapGesture {
-                                    withAnimation(.easeInOut(duration: Constants.UI.quickAnimationDuration)) {
-                                        directoryViewModel.currentChildDirectory = directory
-                                    }
+                                    directoryViewModel.selectChildDirectory(directory)
                                 }
                                 .background(
                                     RoundedRectangle(cornerRadius: Constants.UI.smallCornerRadius)
