@@ -449,6 +449,44 @@
   4. 使用格式化的JSON输出，方便调试和查看
   5. 分离不同类型数据的处理逻辑，提高代码可维护性
 
+#### 5.22 文档保存和数据持久化问题
+- 日期：2025/2/6
+- 类型：功能缺陷
+- 描述：文档内容修改后无法正确保存，当前使用JSON文件存储方式可能导致性能和并发问题
+- 影响：用户修改的文档内容无法保存，影响用户体验和数据完整性
+- 解决方案：
+  1. 在DirectoryViewModel中添加文档内容变更监听
+  2. 在DocumentViewModel中实现内容更新回调
+  3. 完善DataStore的文档保存逻辑
+  4. 建议后续改用Core Data实现数据持久化：
+     ```swift
+     // Core Data 实体设计
+     // Directory 实体
+     - id: UUID
+     - name: String
+     - path: String
+     - isParent: Bool
+     - children: Set<Directory>
+     - documents: Set<Document>
+     - createdAt: Date
+     - updatedAt: Date
+     
+     // Document 实体
+     - id: UUID
+     - title: String
+     - content: String
+     - path: String
+     - directory: Directory
+     - createdAt: Date
+     - updatedAt: Date
+     ```
+- 预防措施：
+  1. 实现数据变更的实时监听和保存
+  2. 使用数据库替代文件存储，提高性能和可靠性
+  3. 添加数据完整性检查和错误恢复机制
+  4. 实现定期数据备份功能
+  5. 添加详细的操作日志，方便问题追踪
+
 ### 6. AI集成问题
 
 ## 问题记录模板
@@ -485,6 +523,7 @@
 21. ViewModel初始化顺序导致的状态管理问题（2025/2/6）
 22. 结构体属性修改问题（2025/2/6）
 23. UUID强制解包和数据文件初始化问题（2025/2/6）
+24. 文档保存和数据持久化问题（2025/2/6）
 
 ## 待解决问题列表
 1. 深色模式适配

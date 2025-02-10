@@ -61,6 +61,12 @@ class DirectoryViewModel: ObservableObject {
     
     private func loadDocument(for directory: Directory) {
         if let document = dataStore.getDocument(id: directory.id) {
+            // 添加文档内容变更监听
+            documentViewModel.onDocumentChanged = { [weak self] updatedDocument in
+                print("文档内容已变更，准备保存：\(updatedDocument.title)")
+                self?.dataStore.saveDocument(updatedDocument)
+            }
+            
             documentViewModel.currentDocument = document
             print("加载文档成功：\(document.title)")
         } else {
@@ -72,6 +78,12 @@ class DirectoryViewModel: ObservableObject {
                 content: "",
                 path: directory.path
             )
+            // 添加文档内容变更监听
+            documentViewModel.onDocumentChanged = { [weak self] updatedDocument in
+                print("文档内容已变更，准备保存：\(updatedDocument.title)")
+                self?.dataStore.saveDocument(updatedDocument)
+            }
+            
             dataStore.saveDocument(document)
             documentViewModel.currentDocument = document
             print("创建新文档：\(document.title)")

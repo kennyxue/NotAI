@@ -1,7 +1,16 @@
 import SwiftUI
 
 class DocumentViewModel: ObservableObject {
-    @Published var currentDocument: Document?
+    @Published var currentDocument: Document? {
+        didSet {
+            if let document = currentDocument {
+                onDocumentChanged?(document)
+            }
+        }
+    }
+    
+    var onDocumentChanged: ((Document) -> Void)?
+    
     @Published var documents: [Document] = []
     
     func createNewDocument() {
@@ -34,6 +43,15 @@ class DocumentViewModel: ObservableObject {
             documents[index] = document
         } else {
             documents.append(document)
+        }
+    }
+    
+    func updateContent(_ newContent: String) {
+        if var document = currentDocument {
+            document.content = newContent
+            document.updatedAt = Date()
+            currentDocument = document
+            print("文档内容已更新：\(document.title)")
         }
     }
 }
