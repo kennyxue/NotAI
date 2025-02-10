@@ -51,23 +51,37 @@ class DirectoryViewModel: ObservableObject {
     // 注入文档视图模型
     private var documentViewModel: DocumentViewModel
     
+    // 数据存储服务
+    private let dataStore = DataStore.shared
+    
     init(documentViewModel: DocumentViewModel) {
         self.documentViewModel = documentViewModel
         loadDirectories()
     }
     
     private func loadDocument(for directory: Directory) {
-        // 模拟加载文档
-        let document = Document(
-            title: directory.name,
-            content: "这是 \(directory.name) 的内容。\n\n可以在这里编辑文档。",
-            path: directory.path
-        )
-        documentViewModel.currentDocument = document
+        if let document = dataStore.getDocument(id: directory.id) {
+            documentViewModel.currentDocument = document
+            print("加载文档成功：\(document.title)")
+        } else {
+            print("未找到文档：\(directory.name)")
+            // 创建新文档
+            let document = Document(
+                id: directory.id,
+                title: directory.name,
+                content: "",
+                path: directory.path
+            )
+            dataStore.saveDocument(document)
+            documentViewModel.currentDocument = document
+            print("创建新文档：\(document.title)")
+        }
     }
     
     func createDirectory(name: String, isParent: Bool) {
-        let newDirectory = Directory(name: name, path: "", isParent: isParent)
+        let path = isParent ? "/\(name)" : "\(currentParentDirectory?.path ?? "")/\(name)"
+        let newDirectory = Directory(name: name, path: path, isParent: isParent)
+        
         if isParent {
             parentDirectories.append(newDirectory)
         } else if let parent = currentParentDirectory {
@@ -78,6 +92,10 @@ class DirectoryViewModel: ObservableObject {
                 currentParentDirectory = updatedParent
             }
         }
+        
+        // 保存到数据存储
+        dataStore.saveDirectory(newDirectory)
+        print("创建目录成功：\(newDirectory.name)")
     }
     
     func deleteDirectory(_ directory: Directory) {
@@ -98,10 +116,16 @@ class DirectoryViewModel: ObservableObject {
                 currentChildDirectory = nil
             }
         }
+        
+        // 从数据存储中删除
+        dataStore.deleteDirectory(id: directory.id)
+        print("删除目录成功：\(directory.name)")
     }
     
     func renameDirectory(_ directory: Directory, newName: String) {
-        let updatedDirectory = Directory(id: directory.id, name: newName, path: directory.path, isParent: directory.isParent)
+        let path = directory.isParent ? "/\(newName)" : "\(currentParentDirectory?.path ?? "")/\(newName)"
+        let updatedDirectory = Directory(id: directory.id, name: newName, path: path, isParent: directory.isParent)
+        
         if directory.isParent {
             if let index = parentDirectories.firstIndex(where: { $0.id == directory.id }) {
                 parentDirectories[index] = updatedDirectory
@@ -122,68 +146,25 @@ class DirectoryViewModel: ObservableObject {
                 }
             }
         }
+        
+        // 保存到数据存储
+        dataStore.saveDirectory(updatedDirectory)
+        print("重命名目录成功：\(directory.name) -> \(newName)")
     }
     
     private func loadDirectories() {
-        // 添加测试数据
-        let quickNotes = Directory(name: "快速笔记", path: "/quick_notes", isParent: true)
-        let nathan = Directory(name: "nathan", path: "/nathan", isParent: true)
-        let projects = Directory(name: "Quick Notes", path: "/projects", isParent: true)
-        let prompt = Directory(name: "prompt", path: "/prompt", isParent: true)
-        let newArea = Directory(name: "新分区1", path: "/new_area", isParent: true)
-        let japan = Directory(name: "日本游", path: "/japan", isParent: true)
-        let model = Directory(name: "大模型", path: "/model", isParent: true)
-        let mac = Directory(name: "2024_mac_co...", path: "/mac", isParent: true)
-        
-        var quickNotesWithChildren = quickNotes
-        quickNotesWithChildren.children = [
-            Directory(name: "How to save time", path: "/quick_notes/time", isParent: false),
-            Directory(name: "工作计划", path: "/quick_notes/work", isParent: false),
-            Directory(name: "读书笔记", path: "/quick_notes/reading", isParent: false)
-        ]
-        
-        var nathanWithChildren = nathan
-        nathanWithChildren.children = [
-            Directory(name: "两轮电动车", path: "/nathan/bike", isParent: false),
-            Directory(name: "项目规划", path: "/nathan/project", isParent: false)
-        ]
-        
-        var projectsWithChildren = projects
-        projectsWithChildren.children = [
-            Directory(name: "AI助手开发", path: "/projects/ai", isParent: false),
-            Directory(name: "技术调研", path: "/projects/research", isParent: false)
-        ]
-        
-        var promptWithChildren = prompt
-        promptWithChildren.children = [
-            Directory(name: "AI提示词", path: "/prompt/ai", isParent: false),
-            Directory(name: "常用模板", path: "/prompt/templates", isParent: false)
-        ]
-        
-        var japanWithChildren = japan
-        japanWithChildren.children = [
-            Directory(name: "行程规划", path: "/japan/plan", isParent: false),
-            Directory(name: "景点攻略", path: "/japan/spots", isParent: false),
-            Directory(name: "美食推荐", path: "/japan/food", isParent: false)
-        ]
-        
-        parentDirectories = [
-            quickNotesWithChildren,
-            nathanWithChildren,
-            projectsWithChildren,
-            promptWithChildren,
-            newArea,
-            japanWithChildren,
-            model,
-            mac
-        ]
+        // 从数据存储加载目录
+        parentDirectories = dataStore.loadDirectories()
+        print("加载目录成功，共\(parentDirectories.count)个父目录")
     }
     
     private func loadChildren(for parent: Directory) {
-        // 模拟从数据源加载子目录
-        // 实际应替换为数据存储层的真实调用
-        if let index = parentDirectories.firstIndex(where: { $0.id == parent.id }) {
-            parentDirectories[index].children = parent.children
+        // 从数据存储加载子目录
+        if let directory = dataStore.getDirectory(id: parent.id) {
+            if let index = parentDirectories.firstIndex(where: { $0.id == parent.id }) {
+                parentDirectories[index].children = directory.children
+                print("加载子目录成功：\(directory.name)，共\(directory.children.count)个子目录")
+            }
         }
     }
     

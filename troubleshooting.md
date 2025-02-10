@@ -402,6 +402,53 @@
   5. 遵循SwiftUI的状态管理最佳实践
   6. 在代码审查时特别关注ViewModel的初始化逻辑
 
+#### 5.20 结构体属性修改问题
+- 日期：2025/2/6
+- 类型：编译错误
+- 描述：在`DataStore.swift`中，使用`let`声明的`Directory`结构体实例无法修改其`children`属性
+- 影响：项目无法编译，出现"Cannot assign to property: 'xxx' is a 'let' constant"错误
+- 解决方案：
+  1. 将`let`声明改为`var`，使结构体实例可变
+  2. 在声明时就完整初始化结构体的所有属性
+  3. 添加注释说明变量的用途
+- 预防措施：
+  1. 在使用结构体时，注意其值类型的特性
+  2. 如果需要修改属性，使用`var`声明
+  3. 在代码审查时特别注意结构体的可变性
+  4. 添加适当的注释说明变量的用途和生命周期
+  5. 考虑使用类而不是结构体，如果需要频繁修改属性
+
+#### 5.21 UUID强制解包和数据文件初始化问题
+- 日期：2025/2/6
+- 类型：运行时错误
+- 描述：在`DataStore.swift`中，UUID(uuidString:)的强制解包导致运行时崩溃；同时数据文件的初始化逻辑不完整
+- 影响：应用启动时崩溃，出现"Thread 1: Fatal error: Unexpectedly found nil while unwrapping an Optional value"错误
+- 解决方案：
+  1. 使用可选绑定替代强制解包：`UUID(uuidString: "xxx") ?? UUID()`
+  2. 完善数据文件初始化逻辑：
+     ```swift
+     private func createDataFilesIfNeeded() {
+         print("检查数据文件...")
+         if !fileExists(at: directoriesFile) {
+             print("目录数据文件不存在，创建默认数据")
+             saveDefaultDirectories()
+         }
+         if !fileExists(at: documentsFile) {
+             print("文档数据文件不存在，创建默认数据")
+             saveDefaultDocuments()
+         }
+     }
+     ```
+  3. 添加详细的日志输出，方便调试
+  4. 使用`JSONEncoder`的`prettyPrinted`格式化输出
+  5. 分离目录和文档的默认数据创建逻辑
+- 预防措施：
+  1. 避免使用强制解包，特别是在处理可能失败的初始化时
+  2. 完善数据初始化逻辑，确保所有必要的文件都被正确创建
+  3. 添加详细的日志输出，方便问题定位
+  4. 使用格式化的JSON输出，方便调试和查看
+  5. 分离不同类型数据的处理逻辑，提高代码可维护性
+
 ### 6. AI集成问题
 
 ## 问题记录模板
@@ -436,6 +483,8 @@
 19. 目录选择死锁问题（2025/2/6）
 20. 子目录选择状态问题（2025/2/6）
 21. ViewModel初始化顺序导致的状态管理问题（2025/2/6）
+22. 结构体属性修改问题（2025/2/6）
+23. UUID强制解包和数据文件初始化问题（2025/2/6）
 
 ## 待解决问题列表
 1. 深色模式适配
