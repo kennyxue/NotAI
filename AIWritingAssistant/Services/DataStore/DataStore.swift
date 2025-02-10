@@ -50,14 +50,32 @@ class DataStore {
             print("目录数据文件不存在，创建默认数据")
             saveDefaultDirectories()
         } else {
-            print("目录数据文件已存在")
+            print("目录数据文件已存在：\(directoriesFile.path)")
+            // 检查文件内容
+            do {
+                let data = try Data(contentsOf: directoriesFile)
+                print("目录数据文件大小：\(data.count)字节")
+            } catch {
+                print("读取目录数据文件失败：\(error.localizedDescription)")
+                print("重新创建默认数据")
+                saveDefaultDirectories()
+            }
         }
         
         if !fileExists(at: documentsFile) {
             print("文档数据文件不存在，创建默认数据")
             saveDefaultDocuments()
         } else {
-            print("文档数据文件已存在")
+            print("文档数据文件已存在：\(documentsFile.path)")
+            // 检查文件内容
+            do {
+                let data = try Data(contentsOf: documentsFile)
+                print("文档数据文件大小：\(data.count)字节")
+            } catch {
+                print("读取文档数据文件失败：\(error.localizedDescription)")
+                print("重新创建默认数据")
+                saveDefaultDocuments()
+            }
         }
     }
     
@@ -183,12 +201,16 @@ class DataStore {
     func loadDirectories() -> [Directory] {
         do {
             let data = try Data(contentsOf: directoriesFile)
+            print("成功读取目录数据文件，大小：\(data.count)字节")
             let directories = try JSONDecoder().decode([Directory].self, from: data)
-            print("加载目录成功，共\(directories.count)个目录")
+            print("成功解码目录数据，共\(directories.count)个父目录")
             return directories
         } catch {
             print("加载目录失败：\(error.localizedDescription)")
-            return []
+            print("错误详情：\(error)")
+            // 如果加载失败，创建默认数据
+            saveDefaultDirectories()
+            return loadDirectories() // 重试加载
         }
     }
     

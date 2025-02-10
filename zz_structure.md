@@ -22,7 +22,10 @@
 │   │   ├── ChatMessage.swift 
 │   │   ├── Directory.swift 
 │   │   ├── Document.swift 
-│   │   └── AppSettings.swift
+│   │   ├── AppSettings.swift
+│   │   └── AIWritingAssistant.xcdatamodeld/
+│   │       └── AIWritingAssistant.xcdatamodel/
+│   │           └── contents
 │   ├── Preview Content/ 
 │   │   └── Preview Assets.xcassets/ 
 │   │       └── Contents.json 
@@ -44,6 +47,8 @@
 │   └── Services/ 
 │       ├── DataStore/ 
 │       │   └── DataStore.swift 
+│       ├── CoreData/
+│       │   └── CoreDataManager.swift
 │       ├── AIService/ 
 │       │   └── AIService.swift 
 │       └── FileManager/ 

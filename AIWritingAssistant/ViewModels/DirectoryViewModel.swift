@@ -2,6 +2,10 @@ import SwiftUI
 
 class DirectoryViewModel: ObservableObject {
     @Published var parentDirectories: [Directory] = []
+    @Published var childDirectories: [Directory] = []
+    @Published var selectedParentDirectory: Directory?
+    @Published var selectedChildDirectory: Directory?
+    
     @Published var currentParentDirectory: Directory? {
         didSet {
             guard oldValue?.id != currentParentDirectory?.id else { return }
@@ -49,13 +53,16 @@ class DirectoryViewModel: ObservableObject {
     private var selectedChildId: UUID?
     
     // 注入文档视图模型
-    private var documentViewModel: DocumentViewModel
+    private let documentViewModel: DocumentViewModel
     
     // 数据存储服务
     private let dataStore = DataStore.shared
+    private let coreDataManager = CoreDataManager.shared
+    private var usesCoreData = false  // 控制是否使用Core Data
     
     init(documentViewModel: DocumentViewModel) {
         self.documentViewModel = documentViewModel
+        print("初始化DirectoryViewModel")
         loadDirectories()
     }
     
@@ -164,19 +171,30 @@ class DirectoryViewModel: ObservableObject {
         print("重命名目录成功：\(directory.name) -> \(newName)")
     }
     
-    private func loadDirectories() {
-        // 从数据存储加载目录
-        parentDirectories = dataStore.loadDirectories()
-        print("加载目录成功，共\(parentDirectories.count)个父目录")
+    func loadDirectories() {
+        print("加载目录...")
+        if usesCoreData {
+            // 从Core Data加载
+            parentDirectories = coreDataManager.fetchDirectories(isParent: true)
+            print("从Core Data加载了\(parentDirectories.count)个父目录")
+        } else {
+            // 从DataStore加载
+            parentDirectories = dataStore.loadDirectories()
+            print("从DataStore加载了\(parentDirectories.count)个父目录")
+        }
     }
     
-    private func loadChildren(for parent: Directory) {
-        // 从数据存储加载子目录
-        if let directory = dataStore.getDirectory(id: parent.id) {
-            if let index = parentDirectories.firstIndex(where: { $0.id == parent.id }) {
-                parentDirectories[index].children = directory.children
-                print("加载子目录成功：\(directory.name)，共\(directory.children.count)个子目录")
-            }
+    func loadChildren(for directory: Directory) {
+        print("加载子目录，父目录：\(directory.name)")
+        if usesCoreData {
+            // 从Core Data加载子目录
+            childDirectories = coreDataManager.fetchDirectories(isParent: false)
+                .filter { $0.path.hasPrefix(directory.path) }
+            print("从Core Data加载了\(childDirectories.count)个子目录")
+        } else {
+            // 从DataStore加载子目录
+            childDirectories = directory.children
+            print("从DataStore加载了\(childDirectories.count)个子目录")
         }
     }
     

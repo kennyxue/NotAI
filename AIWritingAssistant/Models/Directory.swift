@@ -1,20 +1,38 @@
 import Foundation
 
 struct Directory: Identifiable, Codable, Hashable {
-    var id: UUID
+    let id: UUID
     var name: String
     var path: String
     var isParent: Bool
     var children: [Directory]
-    var documents: [Document]
+    var createdAt: Date
+    var updatedAt: Date
     
-    init(id: UUID = UUID(), name: String, path: String, isParent: Bool = false) {
+    init(id: UUID = UUID(), name: String, path: String, isParent: Bool = false, children: [Directory] = []) {
         self.id = id
         self.name = name
         self.path = path
         self.isParent = isParent
-        self.children = []
-        self.documents = []
+        self.children = children
+        self.createdAt = Date()
+        self.updatedAt = Date()
+    }
+    
+    // Core Data 转换支持
+    init(from entity: DirectoryEntity) {
+        self.id = entity.id ?? UUID()
+        self.name = entity.name ?? ""
+        self.path = entity.path ?? ""
+        self.isParent = entity.isParent
+        self.createdAt = entity.createdAt ?? Date()
+        self.updatedAt = entity.updatedAt ?? Date()
+        
+        if let childrenSet = entity.children as? Set<DirectoryEntity> {
+            self.children = childrenSet.map { Directory(from: $0) }
+        } else {
+            self.children = []
+        }
     }
     
     // 实现 Hashable 协议
