@@ -3,6 +3,8 @@ import SwiftUI
 struct SidebarView: View {
     @EnvironmentObject var directoryViewModel: DirectoryViewModel
     @State private var selectedTab = 0
+    @State private var sortOption = DirectorySortOption.name
+    @State private var isAscending = true
     let isParent: Bool
     
     var body: some View {
@@ -25,6 +27,28 @@ struct SidebarView: View {
                 .padding(.horizontal, Constants.UI.smallPadding)
             }
             
+            // 工具栏
+            HStack {
+                if selectedTab == 0 {
+                    Button(action: {
+                        directoryViewModel.createDirectory(
+                            name: "新建\(isParent ? "目录" : "文档")",
+                            isParent: isParent
+                        )
+                    }) {
+                        Label("新建", systemImage: isParent ? "folder.badge.plus" : "doc.badge.plus")
+                            .foregroundColor(.gray)
+                    }
+                    .buttonStyle(PlainButtonStyle())
+                    
+                    Spacer()
+                    
+                    DirectorySortMenu(selectedOption: $sortOption, isAscending: $isAscending)
+                }
+            }
+            .frame(height: Constants.UI.toolbarHeight)
+            .padding(.horizontal, Constants.UI.mediumPadding)
+            
             // 内容区域
             if selectedTab == 0 {
                 DirectoryList(isParent: isParent)
@@ -46,7 +70,7 @@ struct DirectoryList: View {
             LazyVStack(alignment: .leading, spacing: Constants.UI.smallPadding) {
                 if isParent {
                     ForEach(directoryViewModel.parentDirectories) { directory in
-                        DirectoryRow(directory: directory)
+                        DirectoryItem(directory: directory)
                             .contentShape(Rectangle())
                             .onTapGesture {
                                 withAnimation(.easeInOut(duration: Constants.UI.quickAnimationDuration)) {
@@ -60,30 +84,52 @@ struct DirectoryList: View {
                             )
                             .padding(.horizontal, Constants.UI.smallPadding)
                     }
-                } else {
-                    if let selectedParent = directoryViewModel.currentParentDirectory {
-                        ForEach(selectedParent.children) { directory in
-                            DirectoryRow(directory: directory)
-                                .contentShape(Rectangle())
-                                .onTapGesture {
-                                    directoryViewModel.selectChildDirectory(directory)
-                                }
-                                .background(
-                                    RoundedRectangle(cornerRadius: Constants.UI.smallCornerRadius)
-                                        .fill(directoryViewModel.currentChildDirectory?.id == directory.id ?
-                                              Constants.UI.selectedBackground : Color.clear)
-                                )
-                                .padding(.horizontal, Constants.UI.smallPadding)
-                        }
-                    } else {
-                        Text("请选择父目录")
-                            .foregroundColor(.gray)
-                            .frame(maxWidth: .infinity, maxHeight: .infinity)
-                            .padding(Constants.UI.mediumPadding)
+                } else if let selectedParent = directoryViewModel.currentParentDirectory {
+                    ForEach(selectedParent.children) { directory in
+                        DirectoryItem(directory: directory)
+                            .contentShape(Rectangle())
+                            .onTapGesture {
+                                directoryViewModel.selectChildDirectory(directory)
+                            }
+                            .background(
+                                RoundedRectangle(cornerRadius: Constants.UI.smallCornerRadius)
+                                    .fill(directoryViewModel.currentChildDirectory?.id == directory.id ?
+                                          Constants.UI.selectedBackground : Color.clear)
+                            )
+                            .padding(.horizontal, Constants.UI.smallPadding)
                     }
+                } else {
+                    Text("请选择父目录")
+                        .foregroundColor(.gray)
+                        .frame(maxWidth: .infinity, maxHeight: .infinity)
+                        .padding(Constants.UI.mediumPadding)
                 }
             }
             .padding(.vertical, Constants.UI.smallPadding)
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .contentShape(Rectangle())
+            .contextMenu {
+                Button(action: {
+                    directoryViewModel.createDirectory(
+                        name: "新建\(isParent ? "目录" : "文档")",
+                        isParent: isParent
+                    )
+                }) {
+                    Label("新建\(isParent ? "目录" : "文档")", systemImage: isParent ? "folder.badge.plus" : "doc.badge.plus")
+                }
+            }
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .contentShape(Rectangle())
+        .contextMenu {
+            Button(action: {
+                directoryViewModel.createDirectory(
+                    name: "新建\(isParent ? "目录" : "文档")",
+                    isParent: isParent
+                )
+            }) {
+                Label("新建\(isParent ? "目录" : "文档")", systemImage: isParent ? "folder.badge.plus" : "doc.badge.plus")
+            }
         }
     }
 }

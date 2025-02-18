@@ -32,7 +32,10 @@
 │   ├── AIWritingAssistant.entitlements 
 │   ├── Views/ 
 │   │   ├── Components/ 
-│   │   │   └── TabButton.swift 
+│   │   │   ├── TabButton.swift 
+│   │   │   ├── DirectoryItem.swift 
+│   │   │   ├── DirectoryContextMenu.swift 
+│   │   │   └── DirectorySortMenu.swift 
 │   │   ├── Settings/
 │   │   │   ├── SettingsView.swift
 │   │   │   ├── ThemeSettingsView.swift

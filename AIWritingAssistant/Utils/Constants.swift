@@ -44,7 +44,7 @@ enum Constants {
         
         // 颜色
         static let primaryBackground = Color(.windowBackgroundColor)
-        static let secondaryBackground = Color(.controlBackgroundColor)
+        static let secondaryBackground = Color(.windowBackgroundColor)
         static let accentColor = Color.blue
         static let borderColor = Color.gray.opacity(0.2)
         static let selectedBackground = Color.blue.opacity(0.1)
@@ -58,11 +58,11 @@ enum Constants {
         static let largeTitleFontSize: CGFloat = 24
         
         // 布局常量
-        static let toolbarHeight: CGFloat = 28
-        static let tabBarHeight: CGFloat = 36
-        static let searchBarHeight: CGFloat = 36
+        static let toolbarHeight: CGFloat = 40
+        static let tabBarHeight: CGFloat = 40
+        static let searchBarHeight: CGFloat = 40
         static let messageInputHeight: CGFloat = 100
-        static let directoryRowHeight: CGFloat = 32
+        static let directoryRowHeight: CGFloat = 30
         
         // 阴影
         static let defaultShadowRadius: CGFloat = 3

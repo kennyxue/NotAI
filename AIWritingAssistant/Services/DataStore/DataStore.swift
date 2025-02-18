@@ -254,21 +254,83 @@ class DataStore {
     
     // MARK: - 目录操作
     func saveDirectory(_ directory: Directory) {
-        var directories = loadDirectories()
-        if let index = directories.firstIndex(where: { $0.id == directory.id }) {
-            directories[index] = directory
+        print("准备保存目录：\(directory.name)")
+        
+        // 验证目录类型
+        if directory.isParent {
+            print("验证父目录数据")
+            var directories = loadDirectories()
+            if let index = directories.firstIndex(where: { $0.id == directory.id }) {
+                directories[index] = directory
+            } else {
+                directories.append(directory)
+            }
+            saveDirectories(directories)
+            print("保存父目录成功：\(directory.name)")
         } else {
-            directories.append(directory)
+            print("验证子目录数据")
+            // 确保子目录有正确的父目录
+            var directories = loadDirectories()
+            if let parentIndex = directories.firstIndex(where: { $0.path == directory.path.components(separatedBy: "/").dropLast().joined(separator: "/") }) {
+                var parent = directories[parentIndex]
+                if let childIndex = parent.children.firstIndex(where: { $0.id == directory.id }) {
+                    parent.children[childIndex] = directory
+                } else {
+                    parent.children.append(directory)
+                }
+                directories[parentIndex] = parent
+                saveDirectories(directories)
+                print("保存子目录成功：\(directory.name)")
+            } else {
+                print("警告：未找到子目录的父目录，跳过保存")
+            }
         }
-        saveDirectories(directories)
-        print("保存单个目录成功：\(directory.name)")
     }
     
     func deleteDirectory(id: UUID) {
+        print("准备删除目录：\(id)")
         var directories = loadDirectories()
-        directories.removeAll { $0.id == id }
-        saveDirectories(directories)
-        print("删除目录成功：\(id)")
+        
+        // 查找并删除目录
+        if let directoryIndex = directories.firstIndex(where: { $0.id == id }) {
+            let directory = directories[directoryIndex]
+            
+            // 如果是父目录，同时删除其所有子目录
+            if directory.isParent {
+                print("删除父目录及其子目录：\(directory.name)")
+                directories.remove(at: directoryIndex)
+                
+                // 删除关联的文档
+                deleteAssociatedDocuments(for: directory)
+            } else {
+                // 如果是子目录，从父目录中移除
+                print("从父目录中删除子目录：\(directory.name)")
+                if let parentIndex = directories.firstIndex(where: { $0.path == directory.path.components(separatedBy: "/").dropLast().joined(separator: "/") }) {
+                    var parent = directories[parentIndex]
+                    parent.children.removeAll { $0.id == id }
+                    directories[parentIndex] = parent
+                    
+                    // 删除关联的文档
+                    deleteDocument(id: id)
+                }
+            }
+            
+            saveDirectories(directories)
+            print("删除目录成功：\(id)")
+        } else {
+            print("警告：未找到要删除的目录：\(id)")
+        }
+    }
+    
+    private func deleteAssociatedDocuments(for directory: Directory) {
+        print("删除目录关联的文档：\(directory.name)")
+        // 删除当前目录的文档
+        deleteDocument(id: directory.id)
+        
+        // 递归删除子目录的文档
+        for child in directory.children {
+            deleteAssociatedDocuments(for: child)
+        }
     }
     
     func getDirectory(id: UUID) -> Directory? {
