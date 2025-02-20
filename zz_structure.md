@@ -1,85 +1,88 @@
 # 项目结构
-
-
-├── troubleshooting.md 
+NotAI/
 ├── AIWritingAssistant/ 
-│   ├── ViewModels/ 
-│   │   ├── ChatViewModel.swift 
-│   │   ├── DocumentViewModel.swift 
-│   │   └── DirectoryViewModel.swift 
-│   ├── Resources/ 
 │   ├── Assets.xcassets/ 
-│   │   ├── AppIcon.appiconset/ 
-│   │   │   └── Contents.json 
 │   │   ├── AccentColor.colorset/ 
 │   │   │   └── Contents.json 
+│   │   ├── AppIcon.appiconset/ 
+│   │   │   └── Contents.json 
 │   │   └── Contents.json 
-│   ├── Utils/ 
-│   │   ├── Constants.swift 
-│   │   └── Extensions/
-│   │       └── View+Extensions.swift
 │   ├── Models/ 
+│   │   ├── AIWritingAssistant.xcdatamodeld/ 
+│   │   │   └── AIWritingAssistant.xcdatamodel/ 
+│   │   │       └── contents 
+│   │   ├── AppSettings.swift 
 │   │   ├── ChatMessage.swift 
 │   │   ├── Directory.swift 
-│   │   ├── Document.swift 
-│   │   ├── AppSettings.swift
-│   │   └── AIWritingAssistant.xcdatamodeld/
-│   │       └── AIWritingAssistant.xcdatamodel/
-│   │           └── contents
+│   │   └── Document.swift 
 │   ├── Preview Content/ 
 │   │   └── Preview Assets.xcassets/ 
 │   │       └── Contents.json 
-│   ├── AIWritingAssistant.entitlements 
+│   ├── Resources/ 
+│   ├── Services/ 
+│   │   ├── AIService/ 
+│   │   │   └── AIService.swift 
+│   │   ├── CoreData/ 
+│   │   │   └── CoreDataManager.swift 
+│   │   ├── DataStore/ 
+│   │   │   └── DataStore.swift 
+│   │   └── FileManager/ 
+│   │       └── FileManager.swift 
+│   ├── Utils/ 
+│   │   ├── Extensions/ 
+│   │   │   └── View+Extensions.swift 
+│   │   └── Constants.swift 
+│   ├── ViewModels/ 
+│   │   ├── ChatViewModel.swift 
+│   │   ├── DirectoryViewModel.swift 
+│   │   └── DocumentViewModel.swift 
 │   ├── Views/ 
 │   │   ├── Components/ 
-│   │   │   ├── TabButton.swift 
-│   │   │   ├── DirectoryItem.swift 
 │   │   │   ├── DirectoryContextMenu.swift 
-│   │   │   └── DirectorySortMenu.swift 
-│   │   ├── Settings/
-│   │   │   ├── SettingsView.swift
-│   │   │   ├── ThemeSettingsView.swift
-│   │   │   ├── AISettingsView.swift
-│   │   │   └── GeneralSettingsView.swift
-│   │   └── MainLayout/ 
-│   │       ├── SidebarView.swift 
-│   │       ├── EditorView.swift 
-│   │       └── AssistantView.swift 
-│   ├── ContentView.swift 
+│   │   │   ├── DirectoryItem.swift 
+│   │   │   ├── DirectorySortMenu.swift 
+│   │   │   ├── TabButton.swift 
+│   │   │   ├── TextFormatToolbar.swift 
+│   │   │   ├── ColorPickerPanel.swift 
+│   │   │   └── FontSizeSlider.swift 
+│   │   ├── MainLayout/ 
+│   │   │   ├── AssistantView.swift 
+│   │   │   ├── EditorView.swift 
+│   │   │   └── SidebarView.swift 
+│   │   └── Settings/ 
+│   │       ├── AISettingsView.swift 
+│   │       ├── GeneralSettingsView.swift 
+│   │       ├── SettingsView.swift 
+│   │       └── ThemeSettingsView.swift 
+│   ├── AIWritingAssistant.entitlements 
 │   ├── AIWritingAssistantApp.swift 
-│   └── Services/ 
-│       ├── DataStore/ 
-│       │   └── DataStore.swift 
-│       ├── CoreData/
-│       │   └── CoreDataManager.swift
-│       ├── AIService/ 
-│       │   └── AIService.swift 
-│       └── FileManager/ 
-│           └── FileManager.swift 
-├── zz_plan.md 
-├── zz_structure.md 
-├── AIWritingAssistantUITests/ 
-│   ├── AIWritingAssistantUITestsLaunchTests.swift 
-│   └── AIWritingAssistantUITests.swift 
-├── readme.md 
+│   └── ContentView.swift 
 ├── AIWritingAssistant.xcodeproj/ 
-│   ├── project.pbxproj 
+│   ├── project.xcworkspace/ 
+│   │   ├── xcshareddata/ 
+│   │   │   └── swiftpm/ 
+│   │   │       └── configuration/ 
+│   │   ├── xcuserdata/ 
+│   │   │   └── xueyihua.xcuserdatad/ 
+│   │   │       └── UserInterfaceState.xcuserstate 
+│   │   └── contents.xcworkspacedata 
 │   ├── xcuserdata/ 
 │   │   └── xueyihua.xcuserdatad/ 
 │   │       └── xcschemes/ 
 │   │           └── xcschememanagement.plist 
-│   └── project.xcworkspace/ 
-│       ├── contents.xcworkspacedata 
-│       ├── xcuserdata/ 
-│       │   └── xueyihua.xcuserdatad/ 
-│       │       └── UserInterfaceState.xcuserstate 
-│       └── xcshareddata/ 
-│           └── swiftpm/ 
-│               └── configuration/ 
-├── zz_demands.md 
+│   └── project.pbxproj 
 ├── AIWritingAssistantTests/ 
 │   └── AIWritingAssistantTests.swift 
+├── AIWritingAssistantUITests/ 
+│   ├── AIWritingAssistantUITests.swift 
+│   └── AIWritingAssistantUITestsLaunchTests.swift 
+├── readme.md 
+├── troubleshooting.md 
+├── zz_demands.md 
+├── zz_plan.md 
+├── zz_structure.md 
 ├── .git/ 
+
 
 
 

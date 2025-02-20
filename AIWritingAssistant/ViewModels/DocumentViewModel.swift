@@ -1,3 +1,4 @@
+import Foundation
 import SwiftUI
 
 class DocumentViewModel: ObservableObject {
@@ -13,37 +14,64 @@ class DocumentViewModel: ObservableObject {
     
     @Published var documents: [Document] = []
     
+    private let dataStore = DataStore.shared
+    
     func createNewDocument() {
+        print("创建新文档")
         let newDocument = Document(
             title: "新文档",
             content: "",
-            path: "/documents/new"
+            path: "/新文档"
         )
-        documents.append(newDocument)
         currentDocument = newDocument
+        saveDocument()
     }
     
-    func openDocument() {
-        // TODO: 实现打开文档功能
-    }
-    
-    func saveDocument() {
-        guard let document = currentDocument else { return }
-        // TODO: 实现保存文档功能
-        print("保存文档：\(document.title)")
+    func loadDocument(_ document: Document) {
+        print("加载文档：\(document.title)")
+        currentDocument = document
     }
     
     func updateDocument(content: String) {
+        print("更新文档内容")
         guard var document = currentDocument else { return }
         document.content = content
         document.updatedAt = Date()
         currentDocument = document
+        saveDocument()
+    }
+    
+    func updateAttributedDocument(content: NSAttributedString) {
+        print("更新富文本文档内容")
+        guard var document = currentDocument else { return }
         
-        if let index = documents.firstIndex(where: { $0.id == document.id }) {
-            documents[index] = document
-        } else {
-            documents.append(document)
+        // 保存纯文本内容
+        document.content = content.string
+        
+        // 保存富文本内容
+        do {
+            let data = try content.data(
+                from: NSRange(location: 0, length: content.length),
+                documentAttributes: [.documentType: NSAttributedString.DocumentType.rtf]
+            )
+            document.attributedContent = data
+        } catch {
+            print("Error saving attributed content: \(error)")
         }
+        
+        document.updatedAt = Date()
+        currentDocument = document
+        saveDocument()
+    }
+    
+    func saveDocument() {
+        print("保存文档")
+        guard let document = currentDocument else { return }
+        dataStore.saveDocument(document)
+    }
+    
+    func openDocument() {
+        // TODO: 实现打开文档功能
     }
     
     func updateContent(_ newContent: String) {
