@@ -44,11 +44,15 @@ NotAI/
 │   │   │   ├── TabButton.swift 
 │   │   │   ├── TextFormatToolbar.swift 
 │   │   │   ├── ColorPickerPanel.swift 
-│   │   │   └── FontSizeSlider.swift 
+│   │   │   ├── FontSizeSlider.swift 
+│   │   │   └── MessageBubble.swift 
 │   │   ├── MainLayout/ 
 │   │   │   ├── AssistantView.swift 
 │   │   │   ├── EditorView.swift 
-│   │   │   └── SidebarView.swift 
+│   │   │   ├── SidebarView.swift 
+│   │   │   ├── ChatView.swift 
+│   │   │   ├── ComposerView.swift 
+│   │   │   └── StylingView.swift 
 │   │   └── Settings/ 
 │   │       ├── AISettingsView.swift 
 │   │       ├── GeneralSettingsView.swift 
@@ -98,23 +102,41 @@ NotAI/
 ## 2. 主要模块
 ### 2.1 Views层
 - MainLayout: 实现三栏式布局
+  - ContentView: 主界面容器
+  - SidebarView: 左侧目录栏
+  - EditorView: 中央编辑区域
+  - AssistantView: 右侧AI助手区域
 - Components: 可复用的UI组件
+  - TextFormatToolbar: 文本格式化工具栏
+  - DirectoryItem: 目录项组件
+  - TabButton: 标签按钮
+  - MessageBubble: 消息气泡组件
 - 响应式设计，支持窗口大小调整
 
 ### 2.2 ViewModels层
-- 处理业务逻辑
-- 状态管理
-- 数据转换和处理
+- DocumentViewModel: 处理文档相关的业务逻辑
+- DirectoryViewModel: 管理目录结构和选择状态
+- ChatViewModel: 处理AI对话交互
+- 实现数据绑定和状态管理
 
 ### 2.3 Models层
-- 核心数据模型
-- 数据结构定义
-- 业务实体对象
+- Document: 文档数据模型
+- Directory: 目录数据模型
+- ChatMessage: 聊天消息模型
+- AppSettings: 应用设置模型
 
 ### 2.4 Services层
-- 文件操作服务
-- AI服务集成
-- 数据持久化服务
+- AIService: AI服务集成
+  - 支持OpenAI GPT系列模型
+  - 支持Google Gemini模型
+  - API请求管理
+- DataStore: 数据存储服务
+  - 文件读写
+  - 数据序列化与反序列化
+- CoreDataManager: Core Data数据管理
+  - 实体映射
+  - CRUD操作
+  - 数据持久化
 
 ## 3. 数据流
 - 单向数据流

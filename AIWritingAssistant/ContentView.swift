@@ -114,7 +114,7 @@ struct ContentView: View {
                         }
                     }
                 }) {
-                    Image(systemName: isShowingLeftSidebar ? "sidebar.leading" : "sidebar.leading.fill")
+                    Image(systemName: isShowingLeftSidebar ? "sidebar.left" : "sidebar.left")
                         .toolbarItemFrame()
                 }
                 .help(isShowingLeftSidebar ? "隐藏目录" : "显示目录")
@@ -130,7 +130,7 @@ struct ContentView: View {
                         }
                     }
                 }) {
-                    Image(systemName: isShowingRightSidebar ? "sidebar.trailing" : "sidebar.trailing.fill")
+                    Image(systemName: isShowingRightSidebar ? "sidebar.right" : "sidebar.right")
                         .toolbarItemFrame()
                 }
                 .help(isShowingRightSidebar ? "隐藏助手" : "显示助手")
